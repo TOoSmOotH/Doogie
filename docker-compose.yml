@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=sqlite:///./doogie.db
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - frontend-build
+
+  frontend-build:
+    image: node:18-alpine
+    volumes:
+      - ./src/frontend:/app
+    working_dir: /app
+    command: >
+      sh -c "if [ -f package.json ]; then
+               npm install && npm run build;
+             else
+               echo 'Frontend not initialized yet';
+               mkdir -p dist;
+               echo '<html><body><h1>Doogie Frontend</h1><p>Frontend not built yet</p></body></html>' > dist/index.html;
+             fi"
+
+  test:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - ENVIRONMENT=test
+      - DATABASE_URL=sqlite:///./test.db
+    command: pytest
+
+volumes:
+  doogie_data:

@@ -1,0 +1,26 @@
+- We want to create a chat bot with a Hybrid RAG (BM25 + FAISS) and a graphRAG. 
+- Should support neural reranking.
+- It will use an external ollama server or connect to certain API provided LLMs for all LLM needs. Openrouter, OpenAI, Claude
+- I want to use Python 3.12+ and sqlite3
+- I want to use docker and docker compose.
+- All testing will be done inside the docker container.
+- I would like a modern web interface to be dynamic and suitable for a chat bot.
+- The web interface should default to dark mode but also have a light mode.
+- Should have a settings interface so things like API keys etc can be stored. Only the admin should see these settings. 
+- usernames will be email address. 
+- User registration process that requires an administrator to accept them before they can start chatting.
+- Chat history we should be stored in the database so the user can see their historic chats or resume a previous chat.
+- Chats should allow feedback to see if the answer was correct.
+- We should display stats like tokens/s etc for the chat.
+- We should be able to manage the documents in the RAG.
+- Since the user could select a reasoning model we need to deal with <think></think> tags.
+- We should be able to stream results to the front end so the user doesn't have to wait to start seeing results.
+- We should support multiple document types. pdf, docs, md, rst, txt
+- We should be able enter information into the RAG via a form.
+- We should be able to reset the entire RAG.
+- We should be able to force all the documents to be re-processed. 
+- We should be able to point it to a github repository and have it process documents from the repository. 
+- We should be able to give it a website URL and have it walk the website and pull down the appropriate data.
+- We should be able to set a system wide prompt. 
+- When a user chooses to use an ollama server for the LLM it should query which model to use.
+- We should be able to select different models for different tasks.  
