@@ -89,7 +89,7 @@ async def create_document_api(
         source=DocumentSource(document_data.source),
         user_id=current_user.id,
         url=document_data.url,
-        metadata=document_data.metadata,
+        meta_data=document_data.metadata,
         db=db,
     )
     
@@ -165,7 +165,7 @@ async def upload_document(
         source=DocumentSource.UPLOAD,
         user_id=current_user.id,
         file_path=file_path,
-        metadata={"original_filename": file.filename},
+        meta_data={"original_filename": file.filename},
         db=db,
     )
     
@@ -243,7 +243,7 @@ async def update_document(
         document.description = document_data.description
     
     if document_data.metadata is not None:
-        document.metadata = document_data.metadata
+        document.meta_data = document_data.metadata
     
     db.commit()
     db.refresh(document)

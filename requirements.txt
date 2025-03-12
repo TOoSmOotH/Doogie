@@ -2,6 +2,7 @@
 fastapi>=0.104.0
 uvicorn>=0.23.2
 pydantic>=2.4.2
+email-validator>=2.0.0  # Required by Pydantic for email validation
 python-multipart>=0.0.6
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
@@ -14,7 +15,7 @@ sqlite-utils>=3.35
 
 # RAG Components
 faiss-cpu>=1.7.4
-sentence-transformers>=2.2.2
+# Removed sentence-transformers as we're using external models for embeddings
 pyserini>=0.21.0
 networkx>=3.1
 rank_bm25>=0.2.2

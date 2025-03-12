@@ -7,7 +7,10 @@ class DocumentBase(BaseModel):
     """Base document schema."""
     title: str
     description: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
+    
+    class Config:
+        populate_by_name = True
 
 
 class DocumentCreate(DocumentBase):
@@ -21,7 +24,7 @@ class DocumentUpdate(BaseModel):
     """Schema for document update."""
     title: Optional[str] = None
     description: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
 
 
 class DocumentResponse(DocumentBase):
@@ -38,6 +41,7 @@ class DocumentResponse(DocumentBase):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class DocumentUploadResponse(BaseModel):
@@ -60,7 +64,10 @@ class DocumentChunkBase(BaseModel):
     """Base document chunk schema."""
     content: str
     chunk_index: int
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
+    
+    class Config:
+        populate_by_name = True
 
 
 class DocumentChunkResponse(DocumentChunkBase):
@@ -72,13 +79,17 @@ class DocumentChunkResponse(DocumentChunkBase):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class GraphNodeBase(BaseModel):
     """Base graph node schema."""
     node_type: str
     name: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
+    
+    class Config:
+        populate_by_name = True
 
 
 class GraphNodeResponse(GraphNodeBase):
@@ -89,6 +100,7 @@ class GraphNodeResponse(GraphNodeBase):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class GraphEdgeBase(BaseModel):
@@ -97,7 +109,10 @@ class GraphEdgeBase(BaseModel):
     target_id: str
     relation_type: str
     weight: float = 1.0
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
+    
+    class Config:
+        populate_by_name = True
 
 
 class GraphEdgeResponse(GraphEdgeBase):
@@ -107,6 +122,7 @@ class GraphEdgeResponse(GraphEdgeBase):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class SearchQuery(BaseModel):
@@ -126,4 +142,7 @@ class SearchResult(BaseModel):
     document_title: str
     relevance: float
     source: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="meta_data")
+    
+    class Config:
+        populate_by_name = True

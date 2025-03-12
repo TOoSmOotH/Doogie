@@ -36,9 +36,12 @@ app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 app.include_router(rag.router, prefix="/api/rag", tags=["RAG"])
 
 # Mount static files for frontend
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend/dist")
+frontend_dir = "/app/src/frontend/dist"
 if os.path.exists(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+    print(f"Mounted frontend static files from {frontend_dir}")
+else:
+    print(f"Frontend directory not found at {frontend_dir}")
 
 # Root endpoint
 @app.get("/api/health", tags=["Health"])

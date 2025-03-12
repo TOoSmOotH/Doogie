@@ -1,16 +1,21 @@
-version: '3.8'
-
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+      - ./data:/app/data
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=sqlite:///./doogie.db
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+      - DATABASE_URL=sqlite:////app/data/doogie.db
+    command: >
+      sh -c "mkdir -p /app/data &&
+             uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
       - frontend-build
 
@@ -19,6 +24,8 @@ services:
     volumes:
       - ./src/frontend:/app
     working_dir: /app
+    # Run as user 1000 to match typical host user ID
+    user: "1000"
     command: >
       sh -c "if [ -f package.json ]; then
                npm install && npm run build;
@@ -28,14 +35,23 @@ services:
                echo '<html><body><h1>Doogie Frontend</h1><p>Frontend not built yet</p></body></html>' > dist/index.html;
              fi"
 
+  # Test service is now optional and can be run with: docker compose run test
   test:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     volumes:
       - .:/app
+      - ./data:/app/data
     environment:
       - ENVIRONMENT=test
-      - DATABASE_URL=sqlite:///./test.db
-    command: pytest
+      - DATABASE_URL=sqlite:////app/data/test.db
+    command: >
+      sh -c "mkdir -p /app/data &&
+             pytest"
+    profiles:
+      - test
 
-volumes:
-  doogie_data:
+# Using bind mounts instead of Docker volumes

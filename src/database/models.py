@@ -110,7 +110,7 @@ class Document(Base):
     source = Column(Enum(DocumentSource), nullable=False)
     doc_type = Column(Enum(DocumentType), nullable=False)
     status = Column(Enum(DocumentStatus), default=DocumentStatus.PENDING)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)  # Renamed from metadata (reserved name in SQLAlchemy)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     created_by = Column(String, ForeignKey("users.id"))
@@ -127,7 +127,7 @@ class DocumentChunk(Base):
     document_id = Column(String, ForeignKey("documents.id", ondelete="CASCADE"))
     content = Column(Text, nullable=False)
     chunk_index = Column(Integer, nullable=False)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)  # Renamed from metadata (reserved name in SQLAlchemy)
     embedding_file = Column(String)  # Path to embedding file
     created_at = Column(DateTime, server_default=func.now())
 
@@ -144,7 +144,7 @@ class GraphNode(Base):
     chunk_id = Column(String, ForeignKey("document_chunks.id", ondelete="CASCADE"))
     node_type = Column(String, nullable=False)  # e.g., "entity", "concept", "document"
     name = Column(String, nullable=False)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)  # Renamed from metadata (reserved name in SQLAlchemy)
     created_at = Column(DateTime, server_default=func.now())
 
     # Relationships
@@ -162,7 +162,7 @@ class GraphEdge(Base):
     target_id = Column(String, ForeignKey("graph_nodes.id", ondelete="CASCADE"))
     relation_type = Column(String, nullable=False)
     weight = Column(Float, default=1.0)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)  # Renamed from metadata (reserved name in SQLAlchemy)
     created_at = Column(DateTime, server_default=func.now())
 
     # Relationships

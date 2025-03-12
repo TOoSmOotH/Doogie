@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional, AsyncGenerator, Tuple
+from typing import List, Dict, Any, Optional, AsyncGenerator, Tuple, Union
 from sqlalchemy.orm import Session
 import re
 import time
@@ -15,7 +15,7 @@ async def process_message(
     user_id: str,
     db: Session,
     stream: bool = False,
-) -> AsyncGenerator[Dict[str, Any], None] if stream else Tuple[str, Optional[str], int]:
+) -> Union[AsyncGenerator[Dict[str, Any], None], Tuple[str, Optional[str], int]]:
     """
     Process a user message and generate a response.
     

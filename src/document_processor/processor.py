@@ -48,7 +48,7 @@ async def process_document(
                 document_id=document_id,
                 content=chunk_text,
                 chunk_index=i,
-                metadata={"position": i, "total_chunks": len(chunks)},
+                meta_data={"position": i, "total_chunks": len(chunks)},
             )
             db.add(chunk)
             db.commit()
@@ -76,8 +76,8 @@ async def process_document(
     except Exception as e:
         # Update document status to failed
         document.status = DocumentStatus.FAILED
-        document.metadata = document.metadata or {}
-        document.metadata["error"] = str(e)
+        document.meta_data = document.meta_data or {}
+        document.meta_data["error"] = str(e)
         db.commit()
         
         return False
@@ -240,7 +240,7 @@ async def create_document(
             source=source,
             file_path=file_path,
             url=url,
-            metadata=metadata or {},
+            meta_data=metadata or {},
             created_by=user_id,
             status=DocumentStatus.PENDING,
         )
