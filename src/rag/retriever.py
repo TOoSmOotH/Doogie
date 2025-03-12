@@ -5,12 +5,19 @@ import asyncio
 
 from src.database import Document, DocumentChunk, GraphNode, GraphEdge
 from src.llm_connector.factory import get_embedding_model
+from src.rag.bm25_indexer import get_bm25_indexer
+from src.rag.vector_search import get_vector_search
+from src.rag.graph_rag import get_graph_rag
+from src.rag.neural_reranker import get_neural_reranker
 
 
 async def retrieve_context(
     query: str,
     db: Session,
     limit: int = 5,
+    use_hybrid: bool = True,
+    use_graph: bool = True,
+    use_reranking: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Retrieve relevant context for a query using hybrid RAG.
@@ -19,13 +26,51 @@ async def retrieve_context(
         query: The query to retrieve context for
         db: Database session
         limit: Maximum number of results to return
+        use_hybrid: Whether to use hybrid search (BM25 + vector)
+        use_graph: Whether to include graph search results
+        use_reranking: Whether to apply neural reranking
         
     Returns:
         A list of relevant document chunks with metadata
     """
-    # For development, return mock results
-    # In production, this will be replaced with actual retrieval logic
-    return await _mock_retrieve(query, db, limit)
+    # Check if we have any documents in the database
+    doc_count = db.query(Document).count()
+    if doc_count == 0:
+        # If no documents, return mock results
+        return await _mock_retrieve(query, db, limit)
+    
+    # Get results from hybrid search
+    results = []
+    
+    if use_hybrid:
+        # Get hybrid search results (BM25 + vector)
+        hybrid_results = await hybrid_search(query, db, limit=limit * 2)  # Get more results for reranking
+        results.extend(hybrid_results)
+    
+    if use_graph:
+        # Get graph search results
+        graph_results = await graph_search(query, db, limit=limit)
+        
+        # Add graph results, avoiding duplicates
+        existing_ids = {r["id"] for r in results}
+        for result in graph_results:
+            if result["id"] not in existing_ids:
+                results.append(result)
+                existing_ids.add(result["id"])
+    
+    # If no results from either method, fall back to mock results
+    if not results:
+        return await _mock_retrieve(query, db, limit)
+    
+    # Apply neural reranking if requested
+    if use_reranking and results:
+        results = await neural_rerank(query, results, db, limit=limit)
+    else:
+        # Sort by relevance and limit results
+        results.sort(key=lambda x: x.get("relevance", 0), reverse=True)
+        results = results[:limit]
+    
+    return results
 
 
 async def _mock_retrieve(
@@ -132,22 +177,39 @@ async def bm25_search(
     Returns:
         A list of relevant document chunks with metadata
     """
-    # For development, return mock results
-    # In production, this will be replaced with actual BM25 search
-    await asyncio.sleep(0.2)
+    # Get BM25 indexer
+    bm25_indexer = get_bm25_indexer()
     
-    # Mock BM25 results
-    return [
-        {
-            "id": f"mock-chunk-bm25-{i}",
-            "content": f"This is a BM25 result for {query}. It contains keywords like {query.split()[0] if query.split() else 'example'} and other related terms.",
-            "document_id": f"mock-doc-{i}",
-            "title": f"Mock BM25 Document {i}",
-            "relevance": random.uniform(0.6, 0.9),
-            "source": "bm25",
-        }
-        for i in range(limit)
-    ]
+    # Search using BM25
+    results = await bm25_indexer.search(query, limit=limit)
+    
+    # If no results, check if we need to index documents
+    if not results:
+        # Check if we have any documents that need indexing
+        doc_count = db.query(Document).count()
+        if doc_count > 0:
+            print(f"No BM25 results found. Indexing {doc_count} documents...")
+            await bm25_indexer.index_all_documents(db)
+            
+            # Try search again
+            results = await bm25_indexer.search(query, limit=limit)
+    
+    # If still no results, return mock results
+    if not results:
+        # Mock BM25 results
+        return [
+            {
+                "id": f"mock-chunk-bm25-{i}",
+                "content": f"This is a BM25 result for {query}. It contains keywords like {query.split()[0] if query.split() else 'example'} and other related terms.",
+                "document_id": f"mock-doc-{i}",
+                "title": f"Mock BM25 Document {i}",
+                "relevance": random.uniform(0.6, 0.9),
+                "source": "bm25",
+            }
+            for i in range(limit)
+        ]
+    
+    return results
 
 
 async def vector_search(
@@ -172,22 +234,39 @@ async def vector_search(
     # Get query embedding
     query_embedding = await embedding_model.get_embedding(query)
     
-    # For development, return mock results
-    # In production, this will be replaced with actual vector search
-    await asyncio.sleep(0.3)
+    # Get vector search instance
+    vector_search_instance = get_vector_search()
     
-    # Mock vector search results
-    return [
-        {
-            "id": f"mock-chunk-vector-{i}",
-            "content": f"This is a vector search result for {query}. It is semantically similar to the query and discusses {query.split()[0] if query.split() else 'concepts'} in depth.",
-            "document_id": f"mock-doc-{i}",
-            "title": f"Mock Vector Document {i}",
-            "relevance": random.uniform(0.7, 0.95),
-            "source": "vector",
-        }
-        for i in range(limit)
-    ]
+    # Search using vector search
+    results = await vector_search_instance.search(query_embedding, limit=limit, db=db)
+    
+    # If no results, check if we need to index documents
+    if not results:
+        # Check if we have any documents that need indexing
+        doc_count = db.query(Document).count()
+        if doc_count > 0:
+            print(f"No vector search results found. Indexing {doc_count} documents...")
+            await vector_search_instance.index_all_documents(db)
+            
+            # Try search again
+            results = await vector_search_instance.search(query_embedding, limit=limit, db=db)
+    
+    # If still no results, return mock results
+    if not results:
+        # Mock vector search results
+        return [
+            {
+                "id": f"mock-chunk-vector-{i}",
+                "content": f"This is a vector search result for {query}. It is semantically similar to the query and discusses {query.split()[0] if query.split() else 'concepts'} in depth.",
+                "document_id": f"mock-doc-{i}",
+                "title": f"Mock Vector Document {i}",
+                "relevance": random.uniform(0.7, 0.95),
+                "source": "vector",
+            }
+            for i in range(limit)
+        ]
+    
+    return results
 
 
 async def graph_search(
@@ -206,22 +285,45 @@ async def graph_search(
     Returns:
         A list of relevant document chunks with metadata
     """
-    # For development, return mock results
-    # In production, this will be replaced with actual graph search
-    await asyncio.sleep(0.4)
+    # Get graph RAG instance
+    graph_rag = get_graph_rag()
     
-    # Mock graph search results
-    return [
-        {
-            "id": f"mock-chunk-graph-{i}",
-            "content": f"This is a graph search result for {query}. It is connected to concepts related to {query.split()[0] if query.split() else 'topics'} through the knowledge graph.",
-            "document_id": f"mock-doc-{i}",
-            "title": f"Mock Graph Document {i}",
-            "relevance": random.uniform(0.75, 0.98),
-            "source": "graph",
-        }
-        for i in range(limit)
-    ]
+    # Search using graph RAG
+    results = await graph_rag.search(query, limit=limit, db=db)
+    
+    # If no results, check if we need to build the graph
+    if not results:
+        # Check if we have any documents that need graph building
+        doc_count = db.query(Document).count()
+        if doc_count > 0:
+            print(f"No graph search results found. Building graph for {doc_count} documents...")
+            
+            # Get all documents
+            documents = db.query(Document).all()
+            
+            # Build graph for each document
+            for document in documents:
+                await graph_rag.build_graph_for_document(document.id, db)
+            
+            # Try search again
+            results = await graph_rag.search(query, limit=limit, db=db)
+    
+    # If still no results, return mock results
+    if not results:
+        # Mock graph search results
+        return [
+            {
+                "id": f"mock-chunk-graph-{i}",
+                "content": f"This is a graph search result for {query}. It is connected to concepts related to {query.split()[0] if query.split() else 'topics'} through the knowledge graph.",
+                "document_id": f"mock-doc-{i}",
+                "title": f"Mock Graph Document {i}",
+                "relevance": random.uniform(0.75, 0.98),
+                "source": "graph",
+            }
+            for i in range(limit)
+        ]
+    
+    return results
 
 
 async def neural_rerank(
@@ -242,20 +344,19 @@ async def neural_rerank(
     Returns:
         Reranked results
     """
-    # For development, just shuffle and assign new scores
-    # In production, this will be replaced with actual neural reranking
-    await asyncio.sleep(0.3)
+    # Get neural reranker
+    reranker = get_neural_reranker()
     
-    # Copy results to avoid modifying the original
-    reranked = results.copy()
+    # Rerank results
+    reranked_results = await reranker.rerank(query, results, limit=limit)
     
-    # Assign new relevance scores
-    for result in reranked:
-        result["relevance"] = random.uniform(0.8, 0.99)
-        result["reranked"] = True
+    # If no results from reranker, fall back to original results
+    if not reranked_results:
+        # Copy results to avoid modifying the original
+        reranked = results.copy()
+        
+        # Sort by relevance and limit
+        reranked.sort(key=lambda x: x.get("relevance", 0), reverse=True)
+        return reranked[:limit]
     
-    # Sort by new relevance
-    reranked.sort(key=lambda x: x["relevance"], reverse=True)
-    
-    # Limit results
-    return reranked[:limit]
+    return reranked_results

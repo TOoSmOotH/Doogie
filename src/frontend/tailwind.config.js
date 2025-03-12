@@ -9,13 +9,29 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#3b82f6',
-          dark: '#2563eb',
+          DEFAULT: '#5436DA', // Purple similar to Claude
+          dark: '#4520C5',
+          light: '#7C68E3',
         },
         secondary: {
           DEFAULT: '#10b981',
           dark: '#059669',
         },
+        dark: {
+          DEFAULT: '#1A1A1A', // Dark background
+          lighter: '#2D2D2D', // Slightly lighter dark
+          sidebar: '#202123', // Dark sidebar
+          border: '#383838', // Border color for dark mode
+        },
+        light: {
+          DEFAULT: '#FFFFFF',
+          off: '#F7F7F8', // Off-white background
+          sidebar: '#F0F0F0', // Light sidebar
+          border: '#E5E5E5', // Border color for light mode
+        },
+        danger: '#ef4444', // Added for btn-danger
+        warning: '#f59e0b',
+        success: '#10b981',
       },
       fontFamily: {
         sans: [

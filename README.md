@@ -39,7 +39,7 @@ Doogie is a hybrid RAG (Retrieval-Augmented Generation) chatbot system that comb
 
 2. Build and start the containers:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 3. Access the web interface at http://localhost:8000
@@ -52,6 +52,38 @@ Doogie is a hybrid RAG (Retrieval-Augmented Generation) chatbot system that comb
 4. Start chatting!
 
 ## Development
+
+### Development Workflow
+
+Doogie supports two development modes:
+
+#### Development Mode (with Hot Reloading)
+
+This mode provides immediate feedback on frontend changes with hot reloading:
+
+```bash
+# Start the API and frontend development server
+docker compose up api frontend-dev
+```
+
+- Access the frontend at http://localhost:3000
+- Changes to frontend code will be immediately reflected in the browser
+- The API server runs at http://localhost:8000
+- The frontend dev server proxies API requests to the backend automatically
+
+**Note**: The Vite development server is configured to listen on all interfaces (0.0.0.0) to ensure it's accessible from outside the Docker container.
+
+#### Production Mode
+
+This mode builds the frontend as static files served by the API:
+
+```bash
+# Build the frontend and start the API server
+docker compose --profile production up api
+```
+
+- Access the application at http://localhost:8000
+- Frontend changes require a rebuild to be reflected
 
 ### Project Structure
 
@@ -75,7 +107,7 @@ doogie/
 ### Running Tests
 
 ```bash
-docker-compose run test
+docker compose run test
 ```
 
 ## License

@@ -148,6 +148,112 @@ Each decision record follows this format:
 - **Consequences**: The frontend is now properly served by the FastAPI backend, and the React application can access the authentication context. This approach simplifies deployment and development while ensuring proper functionality.
 - **Status**: Accepted
 
+### DEC-20250311-11
+- **Date**: 2025-03-11
+- **Title**: RAG System Implementation Strategy
+- **Context**: For Phase 2, we needed to implement the core RAG components including document processing, BM25 indexing, vector search, graph-based retrieval, and neural reranking.
+- **Options**:
+  1. Use existing libraries like LangChain or LlamaIndex for all RAG components
+  2. Implement custom solutions for all components from scratch
+  3. Use specialized libraries for each component with custom integration
+- **Decision**: Use specialized libraries for each component with custom integration (Pyserini for BM25, FAISS for vector search, NetworkX for graph-based retrieval, and cross-encoder models for reranking).
+- **Rationale**: This approach provides more control and flexibility than using high-level frameworks while leveraging well-established libraries for specific components. It allows for better optimization and customization for our specific needs.
+- **Consequences**: The implementation is more tailored to our requirements and avoids dependencies on high-level frameworks that might change. However, it requires more integration work and maintenance.
+- **Status**: Accepted
+
+### DEC-20250311-12
+- **Date**: 2025-03-11
+- **Title**: Document Chunking Strategy
+- **Context**: Different document types require different chunking strategies for optimal retrieval.
+- **Options**:
+  1. Use a single chunking strategy for all document types
+  2. Implement document type-specific chunking strategies
+  3. Use semantic chunking based on content analysis
+- **Decision**: Implement document type-specific chunking strategies (e.g., heading-based for Markdown/RST, page-based for PDFs, paragraph-based for general text).
+- **Rationale**: Different document types have different structural elements that can be leveraged for more meaningful chunking. This approach preserves the logical structure of documents while ensuring chunks are of appropriate size for retrieval.
+- **Consequences**: More complex chunking logic but better retrieval quality. The system can now handle various document types more effectively, preserving their semantic structure.
+- **Status**: Accepted
+
+### DEC-20250311-13
+- **Date**: 2025-03-11
+- **Title**: Authentication Security Enhancements
+- **Context**: The initial authentication system used hardcoded secrets and lacked password reset functionality.
+- **Options**:
+  1. Keep the simple authentication system for development
+  2. Implement environment variable-based secrets and add password reset
+  3. Use a third-party authentication service
+- **Decision**: Implement environment variable-based secrets and add password reset functionality.
+- **Rationale**: This approach improves security while maintaining control over the authentication system. Using environment variables for secrets follows security best practices, and password reset is an essential feature for user experience.
+- **Consequences**: More secure authentication system with better user experience. The implementation is more complex but provides necessary security features for a production system.
+- **Status**: Accepted
+
+### DEC-20250311-14
+- **Date**: 2025-03-11
+- **Title**: Pure Python BM25 Implementation
+- **Context**: The application was failing to start due to Pyserini being unable to find the Java JDK, which is required for its BM25 indexing functionality.
+- **Options**:
+  1. Install OpenJDK in the Docker container
+  2. Use a different BM25 implementation that doesn't require Java
+  3. Remove BM25 indexing functionality
+- **Decision**: Replace Pyserini with the pure Python rank_bm25 library for BM25 indexing.
+- **Rationale**: This approach eliminates the Java dependency while maintaining BM25 functionality. The rank_bm25 library is a lightweight, pure Python implementation that provides similar functionality without requiring external dependencies like the JDK.
+- **Consequences**: Potentially different performance characteristics compared to Pyserini, but avoids adding a large dependency (JDK) to the Docker image. The implementation is simpler and more consistent with the rest of the Python codebase.
+- **Status**: Accepted
+
+### DEC-20250311-15
+- **Date**: 2025-03-11
+- **Title**: bcrypt Version Compatibility Fix
+- **Context**: The application was encountering an error during user registration due to a compatibility issue between passlib and bcrypt libraries.
+- **Options**:
+  1. Pin bcrypt to a specific version known to work with passlib
+  2. Update passlib to a version compatible with the latest bcrypt
+  3. Replace the authentication system with a different implementation
+- **Decision**: Pin bcrypt to version 4.0.1 in requirements.txt.
+- **Rationale**: This is the simplest and most direct solution to the compatibility issue. Version 4.0.1 of bcrypt is known to work well with passlib and doesn't require changes to the existing authentication code.
+- **Consequences**: Ensures proper functionality of the user registration and authentication system. May require monitoring for future updates to either library to maintain compatibility.
+- **Status**: Accepted
+
+### DEC-20250311-16
+- **Date**: 2025-03-11
+- **Title**: Authentication System Enhancements
+- **Context**: The application was encountering 400 Bad Request errors during user registration and login due to incorrect request formatting and schema inconsistencies.
+- **Options**:
+  1. Update frontend authentication requests to match backend expectations
+  2. Modify backend to accept different request formats
+  3. Implement a middleware to handle format conversion
+  4. Enhance schema validation and error logging
+- **Decision**: Implement a comprehensive fix including frontend request formatting, schema improvements, enhanced error logging, and improved error handling.
+- **Rationale**: A multi-faceted approach addresses several potential issues simultaneously. The frontend now correctly formats requests, the backend schemas are more consistent and explicit, detailed logging helps identify issues, and specific error messages are properly displayed to users.
+- **Consequences**: Improved reliability and user experience of the authentication system. The login now uses form data with the correct Content-Type header for the OAuth2 token endpoint, registration uses JSON with the appropriate Content-Type header, schemas properly validate required fields, and users receive clear feedback about registration issues (such as when an email is already registered).
+- **Status**: Accepted
+
+### DEC-20250312-01
+- **Date**: 2025-03-12
+- **Title**: Frontend Development Workflow Enhancement
+- **Context**: The current Docker setup doesn't automatically reflect UI changes because the frontend-build container runs once at startup, builds the frontend, and exits. This requires manual rebuilds to see UI changes.
+- **Options**:
+  1. Add a dedicated frontend development container with hot reloading
+  2. Implement a manual rebuild process with documented commands
+  3. Modify the build container to use watch mode and stay running
+- **Decision**: Add a dedicated frontend development container with hot reloading (Option 1).
+- **Rationale**: This approach provides the best developer experience by enabling immediate feedback on UI changes. It separates development and production builds, allowing for a more efficient workflow while maintaining the existing production build process.
+- **Consequences**: Developers will need to run an additional container during development, but will benefit from immediate UI updates without manual rebuilds. The development and production environments remain clearly separated, which helps prevent development-only code from affecting production.
+- **Status**: Accepted
+
+### DEC-20250312-02
+- **Date**: 2025-03-12
+- **Title**: UI Theme Implementation and Modernization
+- **Context**: The UI theme implementation was inconsistent, with issues in multiple places: the Settings page had components hardcoded with light theme styles, and the index.html file had hardcoded dark theme classes in the body tag. Additionally, the overall UI design lacked a modern, professional appearance.
+- **Options**:
+  1. Create a separate theme file with all theme variables
+  2. Update individual components to properly respect the theme context
+  3. Implement a global CSS approach with theme classes
+  4. Completely redesign the UI with a new framework
+- **Decision**: Update individual components to properly respect the theme context, remove hardcoded theme classes, and modernize the UI design with a Claude-inspired interface (Option 2 with UI modernization).
+- **Rationale**: This approach provides an immediate fix without requiring a major refactoring of the theme system or switching frameworks. It ensures that all UI components properly check the current theme value and apply appropriate styles, while removing any hardcoded theme classes that would override the theme system. The modernized UI design provides a more professional and contemporary look that enhances user experience.
+- **Consequences**: Improved UI consistency with proper dark/light theme support and a more professional appearance. The Settings page now correctly displays in dark mode when selected, and the application properly respects the user's theme preference without being overridden by hardcoded classes. The updated color scheme, spacing, and component styling create a more modern interface similar to popular AI applications. This approach may require similar updates to other components as they are developed.
+- **Status**: Accepted
+
 ---
 
 ### DEC-Template

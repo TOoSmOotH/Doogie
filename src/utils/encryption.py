@@ -1,13 +1,26 @@
 import os
 import base64
+import secrets
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-# In production, this should be a secure environment variable
-# For development, we'll use a fixed key
-SECRET_KEY = os.getenv("ENCRYPTION_KEY", "this-is-a-development-key-do-not-use-in-production")
-SALT = os.getenv("ENCRYPTION_SALT", "development-salt").encode()
+# Get encryption key and salt from environment variables
+# If not set, generate a secure random key and salt for development
+# In production, these should be set as secure environment variables
+SECRET_KEY = os.getenv("ENCRYPTION_KEY")
+if not SECRET_KEY:
+    # Generate a secure random key for development
+    SECRET_KEY = secrets.token_hex(32)
+    print("WARNING: Using a randomly generated encryption key. Set ENCRYPTION_KEY environment variable in production.")
+
+SALT = os.getenv("ENCRYPTION_SALT")
+if not SALT:
+    # Generate a secure random salt for development
+    SALT = secrets.token_hex(16)
+    print("WARNING: Using a randomly generated salt. Set ENCRYPTION_SALT environment variable in production.")
+
+SALT = SALT.encode()
 
 
 def get_encryption_key():

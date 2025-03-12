@@ -12,13 +12,14 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: '0.0.0.0', // Listen on all interfaces, not just localhost
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://api:8000', // Use Docker service name instead of localhost
         changeOrigin: true,
       },
       '/ws': {
-        target: 'ws://localhost:8000',
+        target: 'ws://api:8000', // Use Docker service name instead of localhost
         ws: true,
       },
     },

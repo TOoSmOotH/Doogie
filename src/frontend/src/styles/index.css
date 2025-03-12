@@ -36,12 +36,56 @@ body {
 
 /* Dark mode styles */
 .dark {
-  @apply bg-gray-900 text-white;
+  @apply bg-dark text-white;
+}
+
+.dark .sidebar {
+  @apply bg-dark-sidebar border-r border-dark-border;
+}
+
+.dark .form-input {
+  @apply bg-dark-lighter border-dark-border text-white;
+}
+
+.dark .btn-ghost {
+  @apply bg-transparent hover:bg-dark-lighter text-gray-300;
+}
+
+.dark .message-user {
+  @apply bg-dark-lighter text-white;
+}
+
+.dark .message-assistant {
+  @apply bg-dark-lighter text-white border-l-4 border-primary;
 }
 
 /* Light mode styles */
 .light {
-  @apply bg-white text-gray-900;
+  @apply bg-light-off text-gray-900;
+}
+
+.light .sidebar {
+  @apply bg-light-sidebar border-r border-light-border;
+}
+
+.light .form-input {
+  @apply bg-white border-light-border text-gray-900;
+}
+
+.light .btn-ghost {
+  @apply bg-transparent hover:bg-gray-100 text-gray-700;
+}
+
+.light .message-user {
+  @apply bg-light text-gray-800;
+}
+
+.light .message-assistant {
+  @apply bg-light text-gray-800 border-l-4 border-primary;
+}
+
+.light pre {
+  @apply bg-gray-100 text-gray-800;
 }
 
 /* Custom scrollbar */
@@ -50,16 +94,31 @@ body {
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
   background: var(--gray-800);
 }
 
-::-webkit-scrollbar-thumb {
+.dark ::-webkit-scrollbar-thumb {
   background: var(--gray-600);
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* Light mode scrollbar */
+.light ::-webkit-scrollbar-track {
+  background: var(--gray-200);
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: var(--gray-400);
+  border-radius: 4px;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-500);
 }
 
@@ -87,7 +146,7 @@ code {
 
 /* Form styles */
 .form-input {
-  @apply bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-primary;
+  @apply border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-primary;
 }
 
 .btn {
@@ -107,7 +166,7 @@ code {
 }
 
 .btn-ghost {
-  @apply bg-transparent hover:bg-gray-800 text-gray-300;
+  @apply bg-transparent;
 }
 
 /* Animation for loading */
@@ -137,7 +196,12 @@ code {
   }
 }
 
-.thinking-tag {
+.dark .thinking-tag {
   @apply bg-gray-700 text-gray-300 p-2 rounded-lg inline-block;
+  animation: thinking 1.5s ease-in-out infinite;
+}
+
+.light .thinking-tag {
+  @apply bg-gray-200 text-gray-700 p-2 rounded-lg inline-block;
   animation: thinking 1.5s ease-in-out infinite;
 }

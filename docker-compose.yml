@@ -16,9 +16,12 @@ services:
     command: >
       sh -c "mkdir -p /app/data &&
              uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload"
-    depends_on:
-      - frontend-build
+    # In development mode, we don't need to depend on frontend-build
+    # depends_on:
+    #   - frontend-build
 
+  # Production frontend build service
+  # This service builds the frontend once and exits
   frontend-build:
     image: node:18-alpine
     volumes:
@@ -34,6 +37,30 @@ services:
                mkdir -p dist;
                echo '<html><body><h1>Doogie Frontend</h1><p>Frontend not built yet</p></body></html>' > dist/index.html;
              fi"
+    profiles:
+      - production
+
+  # Development frontend service with hot reloading
+  # This service runs Vite's development server and watches for changes
+  frontend-dev:
+    image: node:18-alpine
+    volumes:
+      - ./src/frontend:/app
+    working_dir: /app
+    user: "1000"
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://api:8000
+    command: >
+      sh -c "if [ -f package.json ]; then
+               npm install && npm run dev;
+             else
+               echo 'Frontend not initialized yet';
+               exit 1;
+             fi"
+    depends_on:
+      - api
 
   # Test service is now optional and can be run with: docker compose run test
   test:

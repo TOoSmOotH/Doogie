@@ -6,11 +6,16 @@ class UserBase(BaseModel):
     """Base user schema."""
     email: EmailStr
     full_name: Optional[str] = None
+    
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
 
 
 class UserCreate(UserBase):
     """Schema for user creation."""
     password: str = Field(..., min_length=8)
+    full_name: str  # Override the optional full_name from UserBase to make it required
 
 
 class UserLogin(BaseModel):
@@ -38,3 +43,14 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Schema for token data."""
     user_id: Optional[str] = None
+
+
+class PasswordResetRequest(BaseModel):
+    """Schema for password reset request."""
+    email: EmailStr
+
+
+class PasswordReset(BaseModel):
+    """Schema for password reset."""
+    token: str
+    new_password: str = Field(..., min_length=8)

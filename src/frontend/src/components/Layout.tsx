@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 
 const Layout: React.FC = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,15 +16,18 @@ const Layout: React.FC = () => {
   };
 
   const isActive = (path: string) => {
-    return location.pathname.startsWith(path) ? 'bg-gray-800' : '';
+    if (location.pathname.startsWith(path)) {
+      return theme === 'dark' ? 'bg-gray-800' : 'bg-blue-50 text-blue-700';
+    }
+    return '';
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
+    <div className={`flex h-screen ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light-off text-gray-900'}`}>
       {/* Sidebar */}
       <div className="hidden md:flex md:flex-shrink-0">
         <div className="flex flex-col w-64">
-          <div className="flex flex-col h-0 flex-1 bg-gray-800">
+          <div className="sidebar flex flex-col h-0 flex-1">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
                 <h1 className="text-2xl font-bold">Doogie</h1>
@@ -30,10 +35,22 @@ const Layout: React.FC = () => {
               <nav className="mt-5 flex-1 px-2 space-y-1">
                 <Link
                   to="/chat"
-                  className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive('/chat')}`}
+                  className={`group flex items-center px-3 py-2 text-base font-medium rounded-md mb-1 ${
+                    isActive('/chat')
+                      ? theme === 'dark'
+                        ? 'bg-dark-lighter text-white'
+                        : 'bg-light text-primary'
+                      : theme === 'dark'
+                        ? 'text-gray-300 hover:bg-dark-lighter hover:text-white'
+                        : 'text-gray-700 hover:bg-light'
+                  }`}
                 >
                   <svg
-                    className="mr-3 h-6 w-6 text-gray-300"
+                    className={`mr-3 h-5 w-5 ${
+                      isActive('/chat')
+                        ? 'text-primary'
+                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -51,10 +68,22 @@ const Layout: React.FC = () => {
 
                 <Link
                   to="/documents"
-                  className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive('/documents')}`}
+                  className={`group flex items-center px-3 py-2 text-base font-medium rounded-md mb-1 ${
+                    isActive('/documents')
+                      ? theme === 'dark'
+                        ? 'bg-dark-lighter text-white'
+                        : 'bg-light text-primary'
+                      : theme === 'dark'
+                        ? 'text-gray-300 hover:bg-dark-lighter hover:text-white'
+                        : 'text-gray-700 hover:bg-light'
+                  }`}
                 >
                   <svg
-                    className="mr-3 h-6 w-6 text-gray-300"
+                    className={`mr-3 h-5 w-5 ${
+                      isActive('/documents')
+                        ? 'text-primary'
+                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -72,10 +101,22 @@ const Layout: React.FC = () => {
 
                 <Link
                   to="/settings"
-                  className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive('/settings')}`}
+                  className={`group flex items-center px-3 py-2 text-base font-medium rounded-md mb-1 ${
+                    isActive('/settings')
+                      ? theme === 'dark'
+                        ? 'bg-dark-lighter text-white'
+                        : 'bg-light text-primary'
+                      : theme === 'dark'
+                        ? 'text-gray-300 hover:bg-dark-lighter hover:text-white'
+                        : 'text-gray-700 hover:bg-light'
+                  }`}
                 >
                   <svg
-                    className="mr-3 h-6 w-6 text-gray-300"
+                    className={`mr-3 h-5 w-5 ${
+                      isActive('/settings')
+                        ? 'text-primary'
+                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -100,10 +141,22 @@ const Layout: React.FC = () => {
                 {user && user.role === 'admin' && (
                   <Link
                     to="/admin"
-                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive('/admin')}`}
+                    className={`group flex items-center px-3 py-2 text-base font-medium rounded-md mb-1 ${
+                      isActive('/admin')
+                        ? theme === 'dark'
+                          ? 'bg-dark-lighter text-white'
+                          : 'bg-light text-primary'
+                        : theme === 'dark'
+                          ? 'text-gray-300 hover:bg-dark-lighter hover:text-white'
+                          : 'text-gray-700 hover:bg-light'
+                    }`}
                   >
                     <svg
-                      className="mr-3 h-6 w-6 text-gray-300"
+                      className={`mr-3 h-5 w-5 ${
+                        isActive('/admin')
+                          ? 'text-primary'
+                          : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      }`}
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -119,21 +172,70 @@ const Layout: React.FC = () => {
                     Admin
                   </Link>
                 )}
+                
+                {/* Theme Toggle Button */}
+                <button
+                  onClick={toggleTheme}
+                  className={`mt-6 group flex items-center px-3 py-2 text-base font-medium rounded-md ${
+                    theme === 'dark'
+                      ? 'text-gray-300 hover:bg-dark-lighter'
+                      : 'text-gray-600 hover:bg-light'
+                  }`}
+                >
+                  {theme === 'dark' ? (
+                    <svg
+                      className="mr-3 h-5 w-5 text-yellow-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="mr-3 h-5 w-5 text-gray-600"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
+                    </svg>
+                  )}
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </button>
               </nav>
             </div>
-            <div className="flex-shrink-0 flex border-t border-gray-700 p-4">
+            <div className={`flex-shrink-0 flex p-4 border-t ${theme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
               <div className="flex-shrink-0 w-full group block">
                 <div className="flex items-center">
                   <div>
-                    <div className="inline-block h-9 w-9 rounded-full bg-gray-700 text-gray-300 text-center leading-9">
+                    <div className={`inline-block h-9 w-9 rounded-full text-center leading-9 ${
+                      theme === 'dark' ? 'bg-dark-lighter text-primary-light' : 'bg-primary-light text-primary'
+                    }`}>
                       {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </div>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-white">{user?.full_name || user?.email}</p>
+                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {user?.full_name || user?.email}
+                    </p>
                     <button
                       onClick={handleLogout}
-                      className="text-xs font-medium text-gray-300 hover:text-white"
+                      className={`text-xs font-medium ${
+                        theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'
+                      }`}
                     >
                       Logout
                     </button>
@@ -147,11 +249,11 @@ const Layout: React.FC = () => {
 
       {/* Mobile menu */}
       <div className="md:hidden flex flex-col w-full">
-        <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
+        <div className={`px-4 py-3 flex items-center justify-between ${theme === 'dark' ? 'bg-dark-sidebar' : 'bg-light-sidebar'} border-b ${theme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
           <h1 className="text-xl font-bold">Doogie</h1>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-gray-300 hover:text-white"
+            className={theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
           >
             <svg
               className="h-6 w-6"
@@ -180,11 +282,13 @@ const Layout: React.FC = () => {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="bg-gray-800 px-2 pt-2 pb-3 space-y-1">
+          <div className={`px-2 pt-2 pb-3 space-y-1 ${theme === 'dark' ? 'bg-dark-sidebar' : 'bg-light-sidebar'} border-b ${theme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
             <Link
               to="/chat"
               className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/chat') ? 'bg-gray-900' : ''
+                isActive('/chat')
+                  ? theme === 'dark' ? 'bg-dark-lighter text-white' : 'bg-light text-primary'
+                  : theme === 'dark' ? 'text-gray-300 hover:bg-dark-lighter' : 'text-gray-700 hover:bg-light'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -193,7 +297,9 @@ const Layout: React.FC = () => {
             <Link
               to="/documents"
               className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/documents') ? 'bg-gray-900' : ''
+                isActive('/documents')
+                  ? theme === 'dark' ? 'bg-dark-lighter text-white' : 'bg-light text-primary'
+                  : theme === 'dark' ? 'text-gray-300 hover:bg-dark-lighter' : 'text-gray-700 hover:bg-light'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -202,7 +308,9 @@ const Layout: React.FC = () => {
             <Link
               to="/settings"
               className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/settings') ? 'bg-gray-900' : ''
+                isActive('/settings')
+                  ? theme === 'dark' ? 'bg-dark-lighter text-white' : 'bg-light text-primary'
+                  : theme === 'dark' ? 'text-gray-300 hover:bg-dark-lighter' : 'text-gray-700 hover:bg-light'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -212,7 +320,9 @@ const Layout: React.FC = () => {
               <Link
                 to="/admin"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive('/admin') ? 'bg-gray-900' : ''
+                  isActive('/admin')
+                    ? theme === 'dark' ? 'bg-dark-lighter text-white' : 'bg-light text-primary'
+                    : theme === 'dark' ? 'text-gray-300 hover:bg-dark-lighter' : 'text-gray-700 hover:bg-light'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -221,7 +331,11 @@ const Layout: React.FC = () => {
             )}
             <button
               onClick={handleLogout}
-              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white"
+              className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+                theme === 'dark'
+                  ? 'text-gray-300 hover:bg-dark-lighter'
+                  : 'text-gray-700 hover:bg-light'
+              }`}
             >
               Logout ({user?.email})
             </button>
@@ -231,7 +345,7 @@ const Layout: React.FC = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto bg-gray-900">
+        <main className={`flex-1 overflow-y-auto ${theme === 'dark' ? 'bg-dark' : 'bg-light-off'}`}>
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               <Outlet />
